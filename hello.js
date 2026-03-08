@@ -1,6 +1,6 @@
 import { supabase } from './supabase-client.js'
 
-const DEFAULT_USER_ID = 'default-user-0000-0000-000000000001'
+const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
 
 const input   = document.getElementById('textInput')
 const saveBtn = document.getElementById('saveBtn')
