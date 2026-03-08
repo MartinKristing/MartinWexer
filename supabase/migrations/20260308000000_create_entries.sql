@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS entries (
 
 ALTER TABLE entries ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "default user can read entries"   ON entries;
+DROP POLICY IF EXISTS "default user can insert entries" ON entries;
+DROP POLICY IF EXISTS "default user can delete entries" ON entries;
+
 CREATE POLICY "default user can read entries"
   ON entries FOR SELECT
   USING (user_id = '00000000-0000-0000-0000-000000000001');
