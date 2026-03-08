@@ -2,7 +2,7 @@ name: Supabase Migrations
 
 on:
   push:
-    branches: [main]
+    branches: ['claude/hello-world-javascript-1jGJr']
     paths:
       - 'supabase/migrations/**'
 
