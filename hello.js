@@ -20,6 +20,13 @@ async function fetchEntries() {
   data.forEach(entry => {
     const li = document.createElement('li')
     li.textContent = entry.text
+
+    const delBtn = document.createElement('button')
+    delBtn.textContent = 'Ta bort'
+    delBtn.className = 'del-btn'
+    delBtn.addEventListener('click', () => deleteEntry(entry.id))
+    li.appendChild(delBtn)
+
     list.appendChild(li)
   })
 }
@@ -48,6 +55,21 @@ async function saveEntry() {
   }
 
   saveBtn.disabled = false
+}
+
+async function deleteEntry(id) {
+  const { error } = await supabase
+    .from('entries')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    console.error('Fel vid borttagning:', error)
+    status.textContent = 'Fel vid borttagning. Se konsolen.'
+  } else {
+    status.textContent = 'Borttagen!'
+    await fetchEntries()
+  }
 }
 
 saveBtn.addEventListener('click', saveEntry)
