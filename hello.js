@@ -19,7 +19,10 @@ async function fetchEntries() {
   list.innerHTML = ''
   data.forEach(entry => {
     const li = document.createElement('li')
-    li.textContent = entry.text
+
+    const span = document.createElement('span')
+    span.textContent = entry.text
+    li.appendChild(span)
 
     const delBtn = document.createElement('button')
     delBtn.textContent = 'Ta bort'
