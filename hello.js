@@ -1,5 +1,7 @@
 import { supabase } from './supabase-client.js'
 
+const DEFAULT_USER_ID = 'default-user-0000-0000-000000000001'
+
 const input   = document.getElementById('textInput')
 const saveBtn = document.getElementById('saveBtn')
 const list    = document.getElementById('entriesList')
@@ -46,7 +48,7 @@ async function saveEntry() {
 
   const { error } = await supabase
     .from('entries')
-    .insert({ text })
+    .insert({ text, user_id: DEFAULT_USER_ID })
 
   if (error) {
     console.error('Fel vid sparning:', error)

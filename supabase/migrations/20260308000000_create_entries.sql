@@ -4,21 +4,21 @@
 
 CREATE TABLE IF NOT EXISTS entries (
   id         bigserial    PRIMARY KEY,
-  user_id    uuid         NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  user_id    uuid         NOT NULL DEFAULT 'default-user-0000-0000-000000000001',
   text       text         NOT NULL,
   created_at timestamptz  NOT NULL DEFAULT now()
 );
 
 ALTER TABLE entries ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "users can read own entries"
+CREATE POLICY "default user can read entries"
   ON entries FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (user_id = 'default-user-0000-0000-000000000001');
 
-CREATE POLICY "users can insert own entries"
+CREATE POLICY "default user can insert entries"
   ON entries FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (user_id = 'default-user-0000-0000-000000000001');
 
-CREATE POLICY "users can delete own entries"
+CREATE POLICY "default user can delete entries"
   ON entries FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (user_id = 'default-user-0000-0000-000000000001');
