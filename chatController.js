@@ -26,6 +26,33 @@ const castleFacts = [
   'Tyresö slott utanför Stockholm uppfördes på 1620-talet och är idag ett museum med guidade visningar.',
 ]
 
+const jokes = [
+  'Varför kan inte cyklar stå själva? För att de är tvåhjuliga!',
+  'Vad kallar man en sömnig dinosaurie? En brasa-saurus!',
+  'Varför gick tomten till doktorn? För att han hade lite paket-problem!',
+  'Vad är ett spökes favorit-frukt? Boo-bär!',
+  'Varför är matematikboken alltid ledsen? För att den har så många problem!',
+  'Vad sa havet till stranden? Ingenting, det vinkade bara!',
+  'Varför kan inte pirater spela kort? För att de alltid sitter på däck!',
+  'Vad kallas en fisk utan ögon? En fsk!',
+  'Varför skrattar inte ägg åt skämt? För att de inte vill spricka upp!',
+  'Vad sa nollan till åttan? Snygg bälte!',
+  'Varför öppnade spökhotellet? För att det hade många lediga rum!',
+  'Vad är grön och sitter i ett hörn? En sjuk triangel!',
+]
+
+async function pickUnique(pool) {
+  const { data } = await supabase
+    .from('entries')
+    .select('text')
+    .eq('user_id', CALCULATOR_USER_ID)
+
+  const existing = new Set((data || []).map(e => e.text))
+  const available = pool.filter(item => !existing.has(item))
+  if (available.length === 0) return pool[Math.floor(Math.random() * pool.length)]
+  return available[Math.floor(Math.random() * available.length)]
+}
+
 function generateProblem() {
   const type = Math.floor(Math.random() * 4)
   let question, answer
@@ -232,8 +259,14 @@ document.addEventListener('click', () => {
 })
 
 document.getElementById('castleFactBtn').addEventListener('click', async () => {
-  const fact = castleFacts[Math.floor(Math.random() * castleFacts.length)]
+  const fact = await pickUnique(castleFacts)
   await supabase.from('entries').insert({ text: fact, user_id: CALCULATOR_USER_ID })
+  await fetchEntries()
+})
+
+document.getElementById('jokeBtn').addEventListener('click', async () => {
+  const joke = await pickUnique(jokes)
+  await supabase.from('entries').insert({ text: joke, user_id: CALCULATOR_USER_ID })
   await fetchEntries()
 })
 
