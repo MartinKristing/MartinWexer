@@ -238,10 +238,27 @@ document.getElementById('castleFactBtn').addEventListener('click', async () => {
 })
 
 async function clearAllEntries() {
+  const { data, error: fetchError } = await supabase
+    .from('entries')
+    .select('id')
+
+  if (fetchError) {
+    console.error('Fel vid rensning:', fetchError)
+    status.textContent = 'Fel vid rensning. Se konsolen.'
+    return
+  }
+
+  if (data.length === 0) {
+    activeProblem = null
+    return
+  }
+
+  const ids = data.map(e => e.id)
   const { error } = await supabase
     .from('entries')
     .delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000')
+    .in('id', ids)
+
   if (error) {
     console.error('Fel vid rensning:', error)
     status.textContent = 'Fel vid rensning. Se konsolen.'
