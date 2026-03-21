@@ -2,15 +2,20 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
   <title>Hello World</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html {
+      height: 100%;
+    }
+
     body {
       font-family: sans-serif;
       background: #e8e8e8;
-      min-height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -132,6 +137,7 @@
     .chat-input-bar {
       border-top: 1px solid #e8e8e8;
       padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
       display: flex;
       align-items: center;
       gap: 10px;
@@ -177,7 +183,7 @@
       .chat-widget {
         border-radius: 0;
         max-height: none;
-        height: 100vh;
+        height: 100%;
         max-width: 100%;
         box-shadow: none;
       }
