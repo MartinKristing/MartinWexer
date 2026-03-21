@@ -1,16 +1,28 @@
 import { supabase } from './supabase-client.js'
 
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000001'
+const DEFAULT_USER_ID    = '00000000-0000-0000-0000-000000000001'
+const CALCULATOR_USER_ID = '00000000-0000-0000-0000-000000000002'
 
 const input   = document.getElementById('textInput')
 const saveBtn = document.getElementById('saveBtn')
 const list    = document.getElementById('entriesList')
 const status  = document.getElementById('status')
 
+function calcExpression(expr) {
+  if (!/^[\d+\-*/(). ]+$/.test(expr)) return null
+  try {
+    const result = Function('"use strict"; return (' + expr + ')')()
+    if (typeof result !== 'number' || !isFinite(result)) return null
+    return result
+  } catch {
+    return null
+  }
+}
+
 async function fetchEntries() {
   const { data, error } = await supabase
     .from('entries')
-    .select('id, text, created_at')
+    .select('id, text, user_id, created_at')
     .order('created_at', { ascending: true })
 
   if (error) {
@@ -20,11 +32,13 @@ async function fetchEntries() {
 
   list.innerHTML = ''
   data.forEach(entry => {
+    const isCalc = entry.user_id === CALCULATOR_USER_ID
+
     const wrap = document.createElement('div')
-    wrap.className = 'msg-wrap'
+    wrap.className = isCalc ? 'msg-wrap received' : 'msg-wrap'
 
     const bubble = document.createElement('div')
-    bubble.className = 'msg-bubble'
+    bubble.className = isCalc ? 'msg-bubble calc' : 'msg-bubble'
     bubble.textContent = entry.text
 
     const delBtn = document.createElement('button')
@@ -43,24 +57,28 @@ async function fetchEntries() {
 
 async function saveEntry() {
   const text = input.value.trim()
-  if (!text) {
-    status.textContent = 'Skriv något innan du sparar.'
-    return
-  }
+  if (!text || !text.startsWith('=')) return
+
+  const expr   = text.slice(1).trim()
+  const result = calcExpression(expr)
+  if (result === null) return
 
   saveBtn.disabled = true
-  status.textContent = 'Sparar...'
+  status.textContent = 'Räknar...'
 
-  const { error } = await supabase
-    .from('entries')
-    .insert({ text, user_id: DEFAULT_USER_ID })
+  const expressionText = `${expr}=${result}`
 
-  if (error) {
-    console.error('Fel vid sparning:', error)
+  const [exprInsert, calcInsert] = await Promise.all([
+    supabase.from('entries').insert({ text, user_id: DEFAULT_USER_ID }),
+    supabase.from('entries').insert({ text: expressionText, user_id: CALCULATOR_USER_ID })
+  ])
+
+  if (exprInsert.error || calcInsert.error) {
+    console.error('Fel vid sparning:', exprInsert.error || calcInsert.error)
     status.textContent = 'Fel vid sparning. Se konsolen.'
   } else {
     input.value = ''
-    status.textContent = 'Sparat!'
+    status.textContent = ''
     await fetchEntries()
   }
 
