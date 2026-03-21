@@ -1,4 +1,7 @@
 import { supabase } from './supabase-client.js'
+import { create, all } from 'https://cdn.jsdelivr.net/npm/mathjs/+esm'
+
+const math = create(all)
 
 const DEFAULT_USER_ID    = '00000000-0000-0000-0000-000000000001'
 const CALCULATOR_USER_ID = '00000000-0000-0000-0000-000000000002'
@@ -9,14 +12,29 @@ const list    = document.getElementById('entriesList')
 const status  = document.getElementById('status')
 
 function calcExpression(expr) {
-  if (!/^[\d+\-*/(). ]+$/.test(expr)) return null
   try {
-    const result = Function('"use strict"; return (' + expr + ')')()
-    if (typeof result !== 'number' || !isFinite(result)) return null
-    return result
-  } catch {
-    return null
+    const result = math.evaluate(expr)
+    return { value: math.format(result, { precision: 14 }), error: null }
+  } catch (e) {
+    return { value: null, error: e.message }
   }
+}
+
+function errorHint(msg) {
+  if (/Undefined symbol|Undefined function/i.test(msg)) {
+    const name = msg.match(/'([^']+)'/)?.[1] ?? ''
+    return `Okänd funktion eller variabel${name ? ': ' + name : ''}`
+  }
+  if (/Unexpected end|Unexpected token/i.test(msg)) {
+    return 'Ofullständigt uttryck – saknas en siffra eller operator?'
+  }
+  if (/arenthes/i.test(msg)) {
+    return 'Kontrollera att alla parenteser öppnas och stängs'
+  }
+  if (/[Dd]ivision by zero/i.test(msg)) {
+    return 'Division med noll är inte tillåtet'
+  }
+  return 'Kunde inte räkna ut – kontrollera syntaxen'
 }
 
 async function fetchEntries() {
@@ -59,14 +77,18 @@ async function saveEntry() {
   const text = input.value.trim()
   if (!text || !text.startsWith('=')) return
 
-  const expr   = text.slice(1).trim()
-  const result = calcExpression(expr)
-  if (result === null) return
+  const expr = text.slice(1).trim()
+  const { value, error } = calcExpression(expr)
+
+  if (error !== null) {
+    status.textContent = errorHint(error)
+    return
+  }
 
   saveBtn.disabled = true
   status.textContent = 'Räknar...'
 
-  const expressionText = `${expr}=${result}`
+  const expressionText = `${expr}=${value}`
 
   const [exprInsert, calcInsert] = await Promise.all([
     supabase.from('entries').insert({ text, user_id: DEFAULT_USER_ID }),
