@@ -75,7 +75,24 @@ async function fetchEntries() {
 
 async function saveEntry() {
   const text = input.value.trim()
-  if (!text || !text.startsWith('=')) return
+  if (!text) return
+
+  if (!text.startsWith('=')) {
+    saveBtn.disabled = true
+    const { error } = await supabase
+      .from('entries')
+      .insert({ text, user_id: DEFAULT_USER_ID })
+    if (error) {
+      console.error('Fel vid sparning:', error)
+      status.textContent = 'Fel vid sparning. Se konsolen.'
+    } else {
+      input.value = ''
+      status.textContent = ''
+      await fetchEntries()
+    }
+    saveBtn.disabled = false
+    return
+  }
 
   const expr = text.slice(1).trim()
   const { value, error } = calcExpression(expr)
@@ -88,15 +105,23 @@ async function saveEntry() {
   saveBtn.disabled = true
   status.textContent = 'Räknar...'
 
-  const expressionText = `${expr}=${value}`
+  const exprInsert = await supabase
+    .from('entries')
+    .insert({ text, user_id: DEFAULT_USER_ID })
 
-  const [exprInsert, calcInsert] = await Promise.all([
-    supabase.from('entries').insert({ text, user_id: DEFAULT_USER_ID }),
-    supabase.from('entries').insert({ text: expressionText, user_id: CALCULATOR_USER_ID })
-  ])
+  if (exprInsert.error) {
+    console.error('Fel vid sparning:', exprInsert.error)
+    status.textContent = 'Fel vid sparning. Se konsolen.'
+    saveBtn.disabled = false
+    return
+  }
 
-  if (exprInsert.error || calcInsert.error) {
-    console.error('Fel vid sparning:', exprInsert.error || calcInsert.error)
+  const calcInsert = await supabase
+    .from('entries')
+    .insert({ text: `${expr}=${value}`, user_id: CALCULATOR_USER_ID })
+
+  if (calcInsert.error) {
+    console.error('Fel vid sparning:', calcInsert.error)
     status.textContent = 'Fel vid sparning. Se konsolen.'
   } else {
     input.value = ''
