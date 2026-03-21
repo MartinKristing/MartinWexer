@@ -13,6 +13,19 @@ const status  = document.getElementById('status')
 
 let activeProblem = null  // { question: string, answer: number } | null
 
+const castleFacts = [
+  'Gripsholms slott började byggas år 1537 av Gustav Vasa och är ett av Sveriges mest välbevarade renässansslott.',
+  'Drottningholms slott är det enda svenska kungliga slottet som finns med på UNESCOs världsarvslista.',
+  'Kalmar slott är en av Sveriges bäst bevarade renässansborgarna och anlades redan på 1100-talet.',
+  'Läckö slott på Kållandsö i Vänern byggdes under medeltiden och är känt för sina vackra barockinteriörer.',
+  'Skokloster slott innehåller en av Europas bäst bevarade originalinredningar från 1600-talets Sverige.',
+  'Vadstena slott byggdes av Gustav Vasa på 1500-talet och tjänstgjorde länge som statsfängelse.',
+  'Trolleholms slott i Skåne är ett av de få slotten i Sverige som fortfarande ägs och bebos av samma familj sedan 1600-talet.',
+  'Örebro slott har anor från 1200-talet och omgärdas av floden Svartån – det var länge en viktig försvarsborg.',
+  'Strömsholms slott i Västmanland byggdes på 1670-talet och är känt för sin kungliga stallmästaretradition.',
+  'Tyresö slott utanför Stockholm uppfördes på 1620-talet och är idag ett museum med guidade visningar.',
+]
+
 function generateProblem() {
   const type = Math.floor(Math.random() * 4)
   let question, answer
@@ -205,6 +218,43 @@ async function deleteEntry(id) {
   }
 }
 
+// Gear dropdown
+const gearBtn     = document.getElementById('gearBtn')
+const gearDropdown = document.getElementById('gearDropdown')
+
+gearBtn.addEventListener('click', e => {
+  e.stopPropagation()
+  gearDropdown.classList.toggle('hidden')
+})
+
+document.addEventListener('click', () => {
+  gearDropdown.classList.add('hidden')
+})
+
+document.getElementById('castleFactBtn').addEventListener('click', async () => {
+  const fact = castleFacts[Math.floor(Math.random() * castleFacts.length)]
+  await supabase.from('entries').insert({ text: fact, user_id: CALCULATOR_USER_ID })
+  await fetchEntries()
+})
+
+async function clearAllEntries() {
+  const { error } = await supabase
+    .from('entries')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000')
+  if (error) {
+    console.error('Fel vid rensning:', error)
+    status.textContent = 'Fel vid rensning. Se konsolen.'
+  } else {
+    activeProblem = null
+    status.textContent = ''
+    await fetchEntries()
+  }
+}
+
+document.getElementById('clearChatBtn').addEventListener('click', clearAllEntries)
+
+// Quiz-ikon (pratbubbla)
 document.querySelector('.chat-header-icon').addEventListener('click', async () => {
   const problem = generateProblem()
   activeProblem = problem
