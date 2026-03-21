@@ -11,6 +11,42 @@ const saveBtn = document.getElementById('saveBtn')
 const list    = document.getElementById('entriesList')
 const status  = document.getElementById('status')
 
+let activeProblem = null  // { question: string, answer: number } | null
+
+function generateProblem() {
+  const type = Math.floor(Math.random() * 4)
+  let question, answer
+
+  if (type === 0) {
+    // Addition: två 2-3-siffriga tal
+    const a = Math.floor(Math.random() * 150) + 50
+    const b = Math.floor(Math.random() * 150) + 50
+    answer = a + b
+    question = `Vad är ${a} + ${b}?`
+  } else if (type === 1) {
+    // Subtraktion: resultat alltid positivt
+    const b = Math.floor(Math.random() * 80) + 20
+    const a = b + Math.floor(Math.random() * 100) + 20
+    answer = a - b
+    question = `Vad är ${a} − ${b}?`
+  } else if (type === 2) {
+    // Multiplikation: 2-siffrigt × 1-2-siffrigt
+    const a = Math.floor(Math.random() * 15) + 6
+    const b = Math.floor(Math.random() * 9) + 2
+    answer = a * b
+    question = `Vad är ${a} × ${b}?`
+  } else {
+    // Division: svar och divisor valda → täljaren beräknad (alltid heltal)
+    const ans = Math.floor(Math.random() * 10) + 6
+    const divisor = Math.floor(Math.random() * 10) + 3
+    const dividend = ans * divisor
+    answer = ans
+    question = `Vad är ${dividend} ÷ ${divisor}?`
+  }
+
+  return { question, answer }
+}
+
 function calcExpression(expr) {
   try {
     const result = math.evaluate(expr)
@@ -76,6 +112,28 @@ async function fetchEntries() {
 async function saveEntry() {
   const text = input.value.trim()
   if (!text) return
+
+  // Quizläge: inmatningen är ett rent tal → rätta svaret
+  if (activeProblem && /^-?\d+(\.\d+)?$/.test(text)) {
+    const userAnswer = parseFloat(text)
+    const correct = Math.abs(userAnswer - activeProblem.answer) < 0.001
+    const feedback = correct
+      ? `Rätt svar! ${activeProblem.answer} stämmer. Bra jobbat!`
+      : `Fel svar. Rätt svar är ${activeProblem.answer}. Försök igen nästa gång!`
+    activeProblem = null
+
+    saveBtn.disabled = true
+    await supabase.from('entries').insert({ text, user_id: DEFAULT_USER_ID })
+    await supabase.from('entries').insert({ text: feedback, user_id: CALCULATOR_USER_ID })
+    input.value = ''
+    status.textContent = ''
+    await fetchEntries()
+    saveBtn.disabled = false
+    return
+  }
+
+  // Avbryt quizläge om annan inmatning
+  activeProblem = null
 
   if (!text.startsWith('=')) {
     saveBtn.disabled = true
@@ -146,6 +204,13 @@ async function deleteEntry(id) {
     await fetchEntries()
   }
 }
+
+document.querySelector('.chat-header-icon').addEventListener('click', async () => {
+  const problem = generateProblem()
+  activeProblem = problem
+  await supabase.from('entries').insert({ text: problem.question, user_id: CALCULATOR_USER_ID })
+  await fetchEntries()
+})
 
 saveBtn.addEventListener('click', saveEntry)
 
