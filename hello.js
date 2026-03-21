@@ -11,7 +11,7 @@ async function fetchEntries() {
   const { data, error } = await supabase
     .from('entries')
     .select('id, text, created_at')
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
 
   if (error) {
     console.error('Fel vid hämtning:', error)
