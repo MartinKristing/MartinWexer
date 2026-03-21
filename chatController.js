@@ -27,18 +27,18 @@ const castleFacts = [
 ]
 
 const jokes = [
-  'Varför kan inte cyklar stå själva? För att de är tvåhjuliga!',
-  'Vad kallar man en sömnig dinosaurie? En brasa-saurus!',
-  'Varför gick tomten till doktorn? För att han hade lite paket-problem!',
-  'Vad är ett spökes favorit-frukt? Boo-bär!',
-  'Varför är matematikboken alltid ledsen? För att den har så många problem!',
-  'Vad sa havet till stranden? Ingenting, det vinkade bara!',
-  'Varför kan inte pirater spela kort? För att de alltid sitter på däck!',
-  'Vad kallas en fisk utan ögon? En fsk!',
-  'Varför skrattar inte ägg åt skämt? För att de inte vill spricka upp!',
-  'Vad sa nollan till åttan? Snygg bälte!',
-  'Varför öppnade spökhotellet? För att det hade många lediga rum!',
-  'Vad är grön och sitter i ett hörn? En sjuk triangel!',
+  "Why can't bicycles stand on their own? Because they're two-tired!",
+  "Why don't scientists trust atoms? Because they make up everything!",
+  "What do you call a fake noodle? An impasta!",
+  "Why did the scarecrow win an award? Because he was outstanding in his field!",
+  "What do you call cheese that isn't yours? Nacho cheese!",
+  "Why did the math book look so sad? Because it had too many problems!",
+  "What do you call a sleeping dinosaur? A dino-snore!",
+  "Why can't you give Elsa a balloon? Because she'll let it go!",
+  "What do you call a fish without eyes? A fsh!",
+  "Why did the golfer bring an extra pair of pants? In case he got a hole in one!",
+  "What do you call a bear with no teeth? A gummy bear!",
+  "Why don't eggs tell jokes? They'd crack each other up!",
 ]
 
 async function pickUnique(pool) {
