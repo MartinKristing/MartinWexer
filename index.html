@@ -2,27 +2,213 @@
 <html lang="sv">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hello World</title>
   <style>
-    body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 0 16px; }
-    input { width: 100%; padding: 8px; font-size: 1rem; box-sizing: border-box; }
-    button { margin-top: 8px; padding: 8px 16px; font-size: 1rem; cursor: pointer; }
-    ul { list-style: none; padding: 0; margin-top: 24px; }
-    li { padding: 8px; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: center; }
-    .del-btn { padding: 4px 10px; font-size: 0.85rem; color: #fff; background: #c0392b; border: none; border-radius: 4px; cursor: pointer; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      background: #e8e8e8;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-widget {
+      width: 100%;
+      max-width: 480px;
+      height: 100vh;
+      max-height: 680px;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .chat-header {
+      background: #2b44ed;
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .chat-header-icon {
+      width: 42px;
+      height: 42px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      flex-shrink: 0;
+    }
+    .chat-header-title {
+      flex: 1;
+    }
+    .chat-header-title small {
+      display: block;
+      font-size: 0.7rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .chat-header-title strong {
+      font-size: 1.05rem;
+    }
+    .chat-header-actions {
+      display: flex;
+      gap: 14px;
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+
+    /* Messages */
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg-wrap {
+      display: flex;
+      justify-content: flex-end;
+      position: relative;
+    }
+    .msg-bubble {
+      background: #2b44ed;
+      color: #fff;
+      border-radius: 18px 18px 4px 18px;
+      padding: 12px 16px;
+      max-width: 75%;
+      font-size: 0.97rem;
+      line-height: 1.4;
+      word-break: break-word;
+      position: relative;
+    }
+    .msg-bubble .del-btn {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: #c0392b;
+      color: #fff;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .msg-wrap:hover .del-btn {
+      display: flex;
+    }
     .del-btn:hover { background: #a93226; }
-    #status { margin-top: 8px; font-size: 0.9rem; color: #555; }
+
+    /* Status */
+    #status {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #888;
+      padding: 2px 0 4px;
+      min-height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* Input bar */
+    .chat-input-bar {
+      border-top: 1px solid #e8e8e8;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      background: #fff;
+    }
+    .attach-icon {
+      font-size: 1.3rem;
+      color: #aaa;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    #textInput {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.97rem;
+      color: #333;
+      background: transparent;
+    }
+    #textInput::placeholder { color: #bbb; }
+    #saveBtn {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: #2b44ed;
+      color: #fff;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    #saveBtn:hover { background: #1f35c7; }
+    #saveBtn:disabled { background: #aaa; cursor: not-allowed; }
+
+    /* Mobile: full screen */
+    @media (max-width: 520px) {
+      body { background: #fff; align-items: flex-start; }
+      .chat-widget {
+        border-radius: 0;
+        max-height: none;
+        height: 100vh;
+        max-width: 100%;
+        box-shadow: none;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Hello, World!</h1>
+  <div class="chat-widget">
+    <header class="chat-header">
+      <div class="chat-header-icon">&#128172;</div>
+      <div class="chat-header-title">
+        <small>Chat med</small>
+        <strong>Cool Software Company</strong>
+      </div>
+      <div class="chat-header-actions">
+        <span>&#8722;</span>
+        <span>&#9881;</span>
+        <span>&#8964;</span>
+      </div>
+    </header>
 
-  <input type="text" id="textInput" placeholder="Skriv något..." />
-  <button id="saveBtn">Spara</button>
-  <p id="status"></p>
+    <div class="chat-messages" id="entriesList"></div>
 
-  <h2>Sparade meddelanden</h2>
-  <ul id="entriesList"></ul>
+    <p id="status"></p>
+
+    <div class="chat-input-bar">
+      <span class="attach-icon">&#128206;</span>
+      <input type="text" id="textInput" placeholder="Skriv ditt meddelande..." />
+      <button id="saveBtn" title="Skicka">&#9658;</button>
+    </div>
+  </div>
 
   <script type="module" src="hello.js?v=2"></script>
 </body>

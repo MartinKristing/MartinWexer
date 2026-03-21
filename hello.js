@@ -20,20 +20,25 @@ async function fetchEntries() {
 
   list.innerHTML = ''
   data.forEach(entry => {
-    const li = document.createElement('li')
+    const wrap = document.createElement('div')
+    wrap.className = 'msg-wrap'
 
-    const span = document.createElement('span')
-    span.textContent = entry.text
-    li.appendChild(span)
+    const bubble = document.createElement('div')
+    bubble.className = 'msg-bubble'
+    bubble.textContent = entry.text
 
     const delBtn = document.createElement('button')
-    delBtn.textContent = 'Ta bort'
+    delBtn.textContent = '×'
     delBtn.className = 'del-btn'
+    delBtn.title = 'Ta bort'
     delBtn.addEventListener('click', () => deleteEntry(entry.id))
-    li.appendChild(delBtn)
+    bubble.appendChild(delBtn)
 
-    list.appendChild(li)
+    wrap.appendChild(bubble)
+    list.appendChild(wrap)
   })
+
+  list.scrollTop = list.scrollHeight
 }
 
 async function saveEntry() {
